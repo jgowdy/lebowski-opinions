@@ -1,0 +1,38 @@
+version: "1.0"
+package: bash
+opinion_name: test-vanilla
+purity_level: pure-compilation
+
+description: |
+  Standard bash build with no modifications.
+  Used to test Lebowski's core build and attestation functionality.
+
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+
+tags:
+  - test
+  - vanilla
+
+debian_versions:
+  - bookworm
+
+modifications:
+  # No modifications - pure Debian build
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []
+  build_deps:
+    add: []
+
+build_notes: |
+  This is a vanilla Debian build with no modifications.
+  Used to verify Lebowski's reproducible build infrastructure.
+
+verification_notes: |
+  Standard Debian package verification:
+  
+  dpkg -i bash_*.deb
+  bash --version

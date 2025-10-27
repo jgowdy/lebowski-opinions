@@ -1,0 +1,15 @@
+version: '1.0'
+package: bzip2
+opinion_name: test-vanilla
+purity_level: pure-compilation
+description: Standard bzip2 build
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+tags: [test, vanilla]
+debian_versions: [bookworm]
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []

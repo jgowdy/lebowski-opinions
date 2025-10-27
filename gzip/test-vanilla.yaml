@@ -1,0 +1,15 @@
+version: '1.0'
+package: gzip
+opinion_name: test-vanilla
+purity_level: pure-compilation
+description: Standard gzip build
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+tags: [test, vanilla]
+debian_versions: [bookworm]
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []

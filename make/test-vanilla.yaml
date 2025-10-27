@@ -1,0 +1,15 @@
+version: '1.0'
+package: make
+opinion_name: test-vanilla
+purity_level: pure-compilation
+description: Standard make build
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+tags: [test, vanilla]
+debian_versions: [bookworm]
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []

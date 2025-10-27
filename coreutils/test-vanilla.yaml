@@ -1,0 +1,38 @@
+version: "1.0"
+package: coreutils
+opinion_name: test-vanilla
+purity_level: pure-compilation
+
+description: |
+  Standard coreutils build with no modifications.
+  Core Unix utilities: ls, cp, mv, rm, cat, etc.
+
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+
+tags:
+  - test
+  - vanilla
+  - core-utilities
+
+debian_versions:
+  - bookworm
+
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []
+  build_deps:
+    add: []
+
+build_notes: |
+  Vanilla Debian coreutils build.
+  Tests Lebowski with a large, complex package (80+ utilities).
+
+verification_notes: |
+  Standard verification:
+  dpkg -i coreutils_*.deb
+  ls --version
+  cat --version

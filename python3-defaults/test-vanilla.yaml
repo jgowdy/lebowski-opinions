@@ -1,0 +1,15 @@
+version: "1.0"
+package: python3-defaults
+opinion_name: test-vanilla
+purity_level: pure-compilation
+description: Standard python3 build
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+tags: [test, vanilla]
+debian_versions: [bookworm]
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []

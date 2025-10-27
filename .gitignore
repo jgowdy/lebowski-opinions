@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+
+# Build artifacts
+*.deb
+*.buildinfo
+*.changes
+*.tar.gz
+*.tar.xz
+
+# Test outputs
+test-output/
+build-output/

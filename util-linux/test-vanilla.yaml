@@ -1,0 +1,15 @@
+version: '1.0'
+package: util-linux
+opinion_name: test-vanilla
+purity_level: pure-compilation
+description: Standard util-linux build
+maintainer:
+  name: Lebowski Project
+  email: opinions@lebowski.org
+tags: [test, vanilla]
+debian_versions: [bookworm]
+modifications:
+  env: {}
+  cflags: []
+  cxxflags: []
+  ldflags: []
