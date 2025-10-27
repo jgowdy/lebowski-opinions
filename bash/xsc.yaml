@@ -3,7 +3,7 @@ package: bash
 opinion_name: xsc
 purity_level: configure-only
 
-extends: ../_base/xsc-baseline.yaml
+extends: ../_base/xsc.yaml
 
 description: |
   Bash built with XSC toolchain - Zero Syscall Instructions

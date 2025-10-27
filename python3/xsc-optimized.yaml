@@ -3,6 +3,8 @@ package: python3-defaults
 opinion_name: xsc-optimized
 purity_level: configure-only
 
+extends: ../_base/xsc.yaml
+
 description: |
   Python 3 with PGO optimization built for XSC architecture.
 
@@ -27,27 +29,16 @@ tags:
 debian_versions:
   - bookworm
 
-xsc_variant: base
-
 modifications:
-  configure_flags:
-    add:
-      - "--host=x86_64-xsc-linux-gnu"
-      - "--build=x86_64-linux-gnu"
-      - "--enable-optimizations"  # PGO + LTO
-      - "--with-lto"
+  configure_args:
+    - "--enable-optimizations"  # PGO + LTO
+    - "--with-lto"
+
+  cflags:
+    - "-O3"  # Override base -O2 with -O3
 
   env:
-    CC: "x86_64-xsc-linux-gnu-gcc"
-    CXX: "x86_64-xsc-linux-gnu-g++"
-    CFLAGS: "-O3"
-    LDFLAGS: "-lxsc-rt"
     DEB_BUILD_OPTIONS: "parallel=8"
-
-  build_deps:
-    add:
-      - libxsc-rt-dev
-      - x86_64-xsc-linux-gnu-gcc
 
 build_notes: |
   WARNING: Long build time (2-3 hours) due to PGO requiring:
