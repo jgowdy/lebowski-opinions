@@ -1,0 +1,158 @@
+version: "1.0"
+opinion_name: xsc-hardened
+purity_level: configure-only
+
+extends: xsc.yaml
+
+description: |
+  XSC Hardened Opinion
+
+  Extends the base XSC opinion with additional hardware-based security features:
+
+  SECURITY FEATURES:
+  - Intel CET (Control-flow Enforcement Technology):
+    * Shadow Stack (SS) - Prevents return address overwrites
+    * Indirect Branch Tracking (IBT) - Prevents indirect jump hijacking
+  - Stack clash protection
+  - Enhanced FORTIFY_SOURCE (level 3)
+  - Full RELRO (RELocation Read-Only)
+
+  REQUIREMENTS:
+  - CPU with Intel CET support (Ice Lake or newer, or AMD Zen 3+)
+  - XSC toolchain at /build/xsc/xsc-toolchain/
+  - Container image: lebowski/builder:xsc
+
+  NOTE: Binaries built with this opinion will NOT run on CPUs without CET support.
+  Use the standard 'xsc' opinion for broader compatibility.
+
+  VERIFICATION:
+  After build, verify CET is enabled:
+    readelf -n <binary> | grep "x86 feature"
+  Expected: GNU_PROPERTY_X86_FEATURE_1_IBT and GNU_PROPERTY_X86_FEATURE_1_SHSTK
+
+maintainer:
+  name: XSC Project
+  email: xsc@lebowski.org
+
+tags: [xsc, security, cet, hardening, shadow-stack, ibt]
+debian_versions: [bookworm, jammy]
+
+modifications:
+  cflags:
+    # Intel CET - Control-flow Enforcement Technology
+    # Enables both Shadow Stack (return address protection) and IBT (indirect branch tracking)
+    - "-fcf-protection=full"
+
+    # Stack clash protection - prevents stack overflow attacks
+    - "-fstack-clash-protection"
+
+    # Enhanced FORTIFY_SOURCE (level 3 for GCC 12+, stricter than level 2)
+    - "-D_FORTIFY_SOURCE=3"
+
+    # Position Independent Executable (required for full security)
+    - "-fPIE"
+
+  cxxflags:
+    # Same hardening flags for C++ code
+    - "-fcf-protection=full"
+    - "-fstack-clash-protection"
+    - "-D_FORTIFY_SOURCE=3"
+    - "-fPIE"
+
+  ldflags:
+    # PIE linking
+    - "-pie"
+
+    # Full RELRO - make GOT read-only after relocation
+    - "-Wl,-z,relro"
+    - "-Wl,-z,now"
+
+    # Additional hardening: no executable stack
+    - "-Wl,-z,noexecstack"
+
+    # CET enforcement in the dynamic linker
+    - "-Wl,-z,cet-report=error"
+
+verification:
+  zero_syscall: true
+  cet_enabled: true
+
+  commands:
+    - name: "Extract .deb package"
+      cmd: "dpkg-deb -x {package}.deb /tmp/xsc-hardened-verify"
+
+    - name: "Find all ELF binaries"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec file {} \\; | grep ELF"
+
+    - name: "Verify zero syscall instructions"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec objdump -d {} \\; | grep syscall"
+      expected_exit: 1
+      expected_output: ""
+
+    - name: "Verify CET is enabled (Shadow Stack)"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec readelf -n {} \\; | grep GNU_PROPERTY_X86_FEATURE_1_SHSTK"
+      expected_exit: 0
+
+    - name: "Verify CET is enabled (Indirect Branch Tracking)"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec readelf -n {} \\; | grep GNU_PROPERTY_X86_FEATURE_1_IBT"
+      expected_exit: 0
+
+    - name: "Verify PIE (Position Independent Executable)"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec file {} \\; | grep 'pie executable'"
+      expected_exit: 0
+
+    - name: "Verify RELRO (RELocation Read-Only)"
+      cmd: "find /tmp/xsc-hardened-verify -type f -executable -exec readelf -l {} \\; | grep 'GNU_RELRO'"
+      expected_exit: 0
+
+security_notes: |
+  This opinion enables the following security mitigations:
+
+  1. **Intel CET (Control-flow Enforcement Technology)**:
+     - Shadow Stack: Hardware-enforced return address protection
+     - IBT: Indirect branch landing pad enforcement
+     - Prevents ROP (Return-Oriented Programming) attacks
+     - Prevents JOP (Jump-Oriented Programming) attacks
+
+  2. **Stack Clash Protection**:
+     - Prevents stack overflow attacks that bypass stack guards
+     - Ensures stack grows correctly without colliding with heap/mmap
+
+  3. **FORTIFY_SOURCE=3**:
+     - Enhanced buffer overflow detection at compile-time
+     - More aggressive than FORTIFY_SOURCE=2
+     - Runtime checks for string/memory functions
+
+  4. **Full PIE + RELRO**:
+     - Address Space Layout Randomization (ASLR)
+     - GOT (Global Offset Table) is read-only
+     - Prevents GOT overwrite attacks
+
+  5. **XSC Ring-based Syscalls**:
+     - No syscall instructions (prevents syscall-based exploits)
+     - All system calls via submission rings
+     - Reduces attack surface
+
+compatibility_notes: |
+  **CPU Requirements**:
+  - Intel: Ice Lake (10th gen) or newer
+  - AMD: Zen 3 (Ryzen 5000 series) or newer
+
+  **NOT compatible with**:
+  - Intel CPUs older than Ice Lake
+  - AMD CPUs older than Zen 3
+  - VMs without CET passthrough
+
+  To check if your CPU supports CET:
+    cat /proc/cpuinfo | grep -E "cet|ibt|shstk"
+
+  Or:
+    cpuid | grep -i "control-flow"
+
+performance_notes: |
+  CET has minimal performance overhead:
+  - Shadow Stack: <1% overhead
+  - IBT: <1% overhead
+  - Combined: ~1-2% overhead
+
+  The security benefits far outweigh the minimal performance cost.

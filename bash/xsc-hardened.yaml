@@ -1,0 +1,48 @@
+version: "1.0"
+package: bash
+opinion_name: xsc-hardened
+purity_level: configure-only
+
+extends: ../_base/xsc-hardened.yaml
+
+description: |
+  Bash built with XSC toolchain + Hardware Security Features
+
+  This is the HARDENED variant of bash with XSC integration:
+  - Zero syscall instructions (XSC ring-based syscalls)
+  - Intel CET (Shadow Stack + Indirect Branch Tracking)
+  - Stack clash protection
+  - Full PIE + RELRO
+  - FORTIFY_SOURCE=3
+
+  Build command:
+    lebowski build bash \
+      --opinion-file opinions/bash/xsc-hardened.yaml \
+      --output-dir /tmp/bash-xsc-hardened
+
+  Verification:
+    dpkg-deb -x /tmp/bash-xsc-hardened/bash_*.deb /tmp/bash-verify
+    objdump -d /tmp/bash-verify/bin/bash | grep syscall  # NO OUTPUT
+    readelf -n /tmp/bash-verify/bin/bash | grep "x86 feature"  # CET enabled
+
+  REQUIREMENTS:
+  - CPU with Intel CET support (Ice Lake or newer)
+  - Will NOT run on older CPUs without CET
+
+maintainer:
+  name: XSC Project
+  email: xsc@lebowski.org
+
+tags: [xsc, bash, hardening, cet, shadow-stack, zero-syscall]
+
+modifications:
+  # Bash-specific XSC modifications
+  configure_args:
+    - "--enable-static-link"
+    - "--without-bash-malloc"  # Use XSC malloc
+    - "--disable-nls"          # Reduce dependencies
+
+  cflags:
+    # Additional bash-specific flags
+    - "-DXSC_BUILD"
+    - "-DRING_SYSCALLS"
